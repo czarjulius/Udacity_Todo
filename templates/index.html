@@ -5,19 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Todo App</title>
+    <style>
+        #error{
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <form method="POST" action="todos/create">
-        <input type="text" name="description"/>
+    <form id="form">
+        <input type="text" id="description"/>
         <input type="submit" value="create"/>
 
     </form>
-    <ul>
+    <div id="error" class="hidden"> Something Went Wrong!</div>
+    <ul id="todos">
         {% for d in data %}
 
         <li>{{ d.description }}</li>
 
         {% endfor %}
     </ul>
+
+    <script>
+        document.getElementById('form').onsubmit = function(event){
+            event.preventDefault();
+            fetch('/todos/create', {
+                method: 'POST',
+                body: JSON.stringify({
+                    'description': document.getElementById('description').value
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response){
+                return response.json();
+            })
+            .then(function(jsonResponse){
+                console.log(jsonResponse);
+                const liItem = document.getElementById('todos');
+                liItem.innerHTML = jsonResponse['description'];
+                document.getElementById('todos').append(liItem);
+                document.getElementById('error').className = 'hidden';
+            })
+            .catch(function(error){
+                document.getElementById('error').className = '';
+            })
+        }
+    </script>
 </body>
 </html>
